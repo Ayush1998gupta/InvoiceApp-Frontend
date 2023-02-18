@@ -4,21 +4,19 @@ import axios from 'axios';
 import InvoiceItem from './InvoiceItem';
 import { saveAs } from 'file-saver';
 import incrementString from '../helpers/incrementString';
-const date = new Date();
-const today = date.toLocaleDateString('en-GB', {
-  month: 'numeric',
-  day: 'numeric',
-  year: 'numeric',
-});
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 const InvoiceForm = () => {
-  const [invoiceNumber, setInvoiceNumber] = useState(1);
+  const [invoiceNumber, setInvoiceNumber] = useState('00007');
   const [companyName, setCompanyName] = useState('');
   const [gstin, setGstin] = useState('');
   const [city, setCity] = useState('');
   const [street, setStreet] = useState('');
   const [state, setState] = useState('');
   const [zip, setZip] = useState('');
+  const [loader, setLoder] = useState(false);
+  const [estimateDate, setestimateDate] = useState(new Date());
   const [items, setItems] = useState([
     {
       id: uid(6),
@@ -33,6 +31,7 @@ const InvoiceForm = () => {
 
   const onSubmitHandler = async (e) => {
     e.preventDefault();
+    setLoder(true);
     const data = {
       invoiceNumber,
       companyName,
@@ -42,6 +41,7 @@ const InvoiceForm = () => {
       zip,
       gstin,
       items,
+      estimateDate
     };
     try {
       const response = await axios.post(
@@ -57,6 +57,7 @@ const InvoiceForm = () => {
       console.log(error);
     }
     addNextInvoiceHandler();
+    setLoder(false);
   };
 
   const addNextInvoiceHandler = () => {
@@ -110,10 +111,7 @@ const InvoiceForm = () => {
         }
       }
       items.amount =
-        items.qty *
-        items.rate *
-        (1 - items.discount / 100) *
-        (1 + items.cgst / 100 + items.sgst / 100).toFixed(2);
+        items.qty * items.rate * (1 - items.discount / 100).toFixed(2);
       return items;
     });
     setItems(newItems);
@@ -150,8 +148,12 @@ const InvoiceForm = () => {
             />
           </div>
           <div className="flex space-x-2">
-            <span className="font-bold">Current Date: </span>
-            <span>{today}</span>
+            <span className="font-bold">Estimate Date: </span>
+            <DatePicker
+              selected={estimateDate}
+              dateFormat="dd/MM/yyyy"
+              onChange={(date) => setestimateDate(date)}
+            />
           </div>
         </div>
         <h1 className="text-center text-lg font-bold">INVOICE</h1>
@@ -165,6 +167,7 @@ const InvoiceForm = () => {
             placeholder="Company name"
             type="text"
             name="companyName"
+            autoCapitalize="words"
             id="companyName"
             value={companyName}
             onChange={(event) => setCompanyName(event.target.value)}
@@ -185,6 +188,7 @@ const InvoiceForm = () => {
             placeholder="City"
             type="text"
             name="city"
+            autoCapitalize="on"
             id="city"
             value={city}
             onChange={(event) => setCity(event.target.value)}
@@ -195,6 +199,7 @@ const InvoiceForm = () => {
             placeholder="Street"
             type="text"
             name="street"
+            autoCapitalize="on"
             id="street"
             value={street}
             onChange={(event) => setStreet(event.target.value)}
@@ -204,6 +209,7 @@ const InvoiceForm = () => {
             className="flex-1"
             placeholder="State"
             type="text"
+            autoCapitalize="on"
             name="state"
             id="state"
             value={state}
@@ -288,8 +294,9 @@ const InvoiceForm = () => {
           <button
             className="w-full rounded-md bg-blue-500 py-2 text-sm text-white shadow-sm hover:bg-blue-600"
             type="submit"
+            disabled={loader}
           >
-            Review Invoice
+            {!loader ? 'Download Invoice' : 'Please Wait ...'}
           </button>
         </div>
       </div>

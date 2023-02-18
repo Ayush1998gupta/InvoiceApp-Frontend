@@ -13,12 +13,7 @@ const InvoiceItem = ({
     onDeleteItem(id);
   };
 
-  const amount = (
-    qty *
-    rate *
-    (1 - discount / 100) *
-    (1 + 9 / 100 + 9 / 100)
-  ).toFixed(2);
+  const amount = (qty * rate * (1 - discount / 100)).toFixed(2);
   return (
     <tr>
       <td className="w-full">
