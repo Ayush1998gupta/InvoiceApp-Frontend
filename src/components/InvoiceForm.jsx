@@ -41,11 +41,11 @@ const InvoiceForm = () => {
       zip,
       gstin,
       items,
-      estimateDate
+      estimateDate,
     };
     try {
       const response = await axios.post(
-        'http://localhost:11000/getInvoice',
+        'https://invoicebackend.onrender.com/getInvoice',
         data,
         {
           responseType: 'blob',
